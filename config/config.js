@@ -1,0 +1,1 @@
+module.exports.SEED = '@#-batenchos@#collóns@#no#@chan#@';
