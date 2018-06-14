@@ -1,0 +1,10 @@
+{
+    "name": "",
+    "version": "",
+    "scripts": {
+        "dev": "lite-server -c ls-config.json"
+    },
+    "devDependencies": {
+        "lite-server": "^2.3.0"
+    }
+}
