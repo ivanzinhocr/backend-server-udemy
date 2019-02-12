@@ -16,7 +16,7 @@ const usuariosPorPagina = 5;
 // Obter todos os datos dos médicos
 // =====================================
 
-app.get('/', (req, res, next) => {
+app.get('/', (req, res) => {
 
     var pagina = Number(req.query.pagina || 1);
 
@@ -40,7 +40,7 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                Medico.count({}, (err, cantidad) => {
+                Medico.count({}, (cantidad) => {
                     var paginas = Math.trunc(cantidad / usuariosPorPagina);
 
                     if (cantidad % usuariosPorPagina != 0) {
@@ -50,10 +50,47 @@ app.get('/', (req, res, next) => {
                     res.status(200).json({
                         ok: true,
                         medicos: medicos,
-                        paginas: paginas
+                        paginas: paginas,
+                        cantidad: cantidad
                     });
-                })
+                });
             });
+});
+
+// =====================================
+// Obter todos os datos dun médico
+// =====================================
+
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+
+    Medico.findById(id)
+        .populate('usuario', 'nombre email img')
+        .populate('hospital')
+        .exec((err, medico) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar médico',
+                    errors: err
+
+                });
+            }
+
+            if (!medico) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El médico con el id' + id + ' no existe',
+                    errors: { message: 'No existe un médico con ese ID' }
+                })
+            }
+
+            res.status(200).json({
+                ok: true,
+                medico: medico
+            });
+        });
 });
 
 // =================================================
@@ -157,9 +194,19 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
             });
         }
 
-        res.status(200).json({
-            ok: true,
-            medico: medicoBorrado
+        Medico.count({}, (cantidad) => {
+            var paginas = Math.trunc(cantidad / usuariosPorPagina);
+
+            if (cantidad % usuariosPorPagina != 0) {
+                paginas = paginas + 1;
+            }
+
+            res.status(200).json({
+                ok: true,
+                medico: medicoBorrado,
+                paginas: paginas,
+                cantidad: cantidad
+            });
         });
     });
 });

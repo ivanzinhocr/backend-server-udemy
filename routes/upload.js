@@ -89,8 +89,6 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                 });
             }
 
-            usuario.caca;
-
             var pathViejo = './uploads/usuarios/' + usuario.img;
 
             if (fs.existsSync(pathViejo)) {
@@ -111,7 +109,7 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
 
                 usuario.password = ':)';
 
-                res.status(200).json({
+                return res.status(200).json({
                     ok: true,
                     mensaje: 'Imagen de usuario actualizada',
                     usuario: usuarioActualizado
@@ -135,7 +133,7 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
 
             var pathViejo = './uploads/medicos/' + medico.img;
 
-            if (fs.existsSync(pathViejo)) {
+            if (fs.existsSync(pathViejo) && (medico.img.length > 0)) {
                 fs.unlink(pathViejo);
             }
 
@@ -151,7 +149,7 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                     });
                 }
 
-                res.status(200).json({
+                return res.status(200).json({
                     ok: true,
                     mensaje: 'Imagen del médico actualizada',
                     medico: medicoActualizado
@@ -191,7 +189,7 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                     });
                 }
 
-                res.status(200).json({
+                return res.status(200).json({
                     ok: true,
                     mensaje: 'Imagen del hospital actualizada',
                     hospital: hospitalActualizado

@@ -10,7 +10,42 @@ var app = express();
 
 var Hospital = require('../models/hospital');
 
-const usuariosPorPagina = 5;
+const hospitalesPorPagina = 5;
+
+// =====================================
+// Obter todos os datos dun hospital
+// =====================================
+
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+
+    Hospital.findById(id)
+        .populate('usuario', 'nombre img email')
+        .exec((err, hospital) => {
+
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al consultar el hospital',
+                    errors: err
+                });
+            }
+
+            if (!hospital) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'No existe un hospital con el id' + id,
+                    errors: { message: 'No existe un hospital con el id ' + id }
+                });
+            }
+
+            res.status(200).json({
+                ok: true,
+                hospital: hospital
+            });
+        });
+});
 
 // =====================================
 // Obter todos os datos dos hospitais
@@ -19,14 +54,15 @@ const usuariosPorPagina = 5;
 app.get('/', (req, res, next) => {
 
     var pagina = Number(req.query.pagina || 1);
+    var elementosPagina = Number(req.query.elementosPagina || hospitalesPorPagina);
 
     if (pagina <= 0) {
         pagina = 1;
     }
 
     Hospital.find({})
-        .skip(usuariosPorPagina * (pagina - 1))
-        .limit(usuariosPorPagina)
+        .skip(elementosPagina * (pagina - 1))
+        .limit(elementosPagina)
         .populate('usuario', 'nombre email')
         .exec(
             (err, hospitales) => {
@@ -40,16 +76,17 @@ app.get('/', (req, res, next) => {
                 }
 
                 Hospital.count({}, (err, cantidad) => {
-                    var paginas = Math.trunc(cantidad / usuariosPorPagina);
+                    var paginas = Math.trunc(cantidad / elementosPagina);
 
-                    if (cantidad % usuariosPorPagina != 0) {
+                    if (cantidad % elementosPagina != 0) {
                         paginas = paginas + 1;
                     }
 
                     res.status(200).json({
                         ok: true,
                         hospitales: hospitales,
-                        paginas: paginas
+                        paginas: paginas,
+                        cantidad: cantidad
                     });
                 });
             });
@@ -109,7 +146,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var hospital = new Hospital({
         nombre: body.nombre,
         img: body.img,
-        usuario: req.usuario._id
+        //usuario: req.usuario._id
     });
 
     hospital.save((err, hospitalGardado) => {
@@ -154,9 +191,18 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
             });
         }
 
-        res.status(200).json({
-            ok: true,
-            hospital: hospitalBorrado
+        Hospital.count({}, (err, cantidad) => {
+            var paginas = Math.trunc(cantidad / elementosPagina);
+
+            if (cantidad % elementosPagina != 0) {
+                paginas = paginas + 1;
+            }
+
+            res.status(200).json({
+                ok: true,
+                hospital: hospitalBorrado,
+                paginas: paginas
+            });
         });
     });
 });

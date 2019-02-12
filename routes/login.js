@@ -45,14 +45,20 @@ async function verify(token) {
 app.post('/google', async(req, res) => {
 
     var token = req.body.token;
+    var valido = true;
 
     var googleUser = await verify(token)
         .catch(e => {
+            valido = false;
             return res.status(403).json({
                 ok: false,
                 mensaje: 'Token no válido'
             });
         });
+
+    if (!valido) {
+        return;
+    }
 
     Usuario.findOne({ email: googleUser.email }, (err, usuarioDB) => {
         if (err) {
@@ -103,7 +109,7 @@ app.post('/google', async(req, res) => {
                 var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4 horas
 
                 res.status(200).json({
-                    ok: 'truer',
+                    ok: true,
                     usuario: usuarioDB,
                     token: token,
                     id: usuarioDB._id

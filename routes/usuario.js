@@ -26,7 +26,7 @@ app.get('/', (req, res, next) => {
         pagina = 1;
     }
 
-    Usuario.find({}, 'nombre email img role')
+    Usuario.find({}, 'nombre email img role google')
         .skip(usuariosPorPagina * (pagina - 1))
         .limit(usuariosPorPagina)
         .exec(
@@ -50,6 +50,7 @@ app.get('/', (req, res, next) => {
                     res.status(200).json({
                         ok: true,
                         usuarios: usuarios,
+                        cantidad: cantidad,
                         paginas: paginas
                     });
                 });
@@ -106,8 +107,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 // =================================================
 // Crear un novo usuario
 // =================================================
-app.post('/', mdAutenticacion.verificaToken, (req, res) => {
-
+//app.post('/', mdAutenticacion.verificaToken, (req, res) => {
+app.post('/', (req, res) => {
     var body = req.body;
 
     var usuario = new Usuario({
