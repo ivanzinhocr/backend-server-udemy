@@ -28,3 +28,38 @@ exports.verificaToken = function(req, res, next) {
         // });
     });
 };
+
+// =================================================
+// Verificar admin
+// =================================================
+exports.verificaAdmin = function(req, res, next) {
+    var usuario = req.usuario;
+
+    if (usuario.role === 'ADMIN_ROLE') {
+        next();
+    } else {
+        return res.status(401).json({
+            ok: false,
+            mensaje: 'Token inválido - no es administrador',
+            errors: { message: 'No es administrador, petición denegada' }
+        });
+    }
+};
+
+// =================================================
+// Verificar admin ou mesmo usuario
+// =================================================
+exports.verificaAdmin_o_MismoUsuario = function(req, res, next) {
+    var usuario = req.usuario;
+    var id = req.params.id;
+
+    if (usuario.role === 'ADMIN_ROLE' || usuario._id === id) {
+        next();
+    } else {
+        return res.status(401).json({
+            ok: false,
+            mensaje: 'Token inválido - no es administrador o mismo usuario',
+            errors: { message: 'No es administrador o mismo usuario, petición denegada' }
+        });
+    }
+};
